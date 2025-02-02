@@ -42,8 +42,8 @@ export const votequestion = (id, value) => async (dispatch) => {
 
 export const postanswer=(answerdata)=>async(dispatch)=>{
     try {
-        const{id,noofanswers,answerbody,useranswered}=answerdata;
-        const {data}=await api.postanswer(id,noofanswers,answerbody,useranswered);
+        const{id,noofanswers,answerbody,useranswered,userid}=answerdata;
+        const {data}=await api.postanswer(id,noofanswers,answerbody,useranswered,userid);
         dispatch({type:"POST_ANSWER",payload:data});
         dispatch(fetchallquestion())
     } catch (error) {
