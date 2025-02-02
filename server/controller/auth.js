@@ -1,50 +1,49 @@
 import users from '../models/auth.js'
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+
 export const signup = async (req, res) => {
     const { name, email, password } = req.body;
+    const avatar = req.file ? req.file.location : null; // Use S3 URL
+
     try {
-        const extinguser = await users.findOne({ email });
-        if (extinguser) {
-            return res.status(404).json({ message: "User already exist" });
+        const existingUser = await users.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
         }
-        const hashedpassword = await bcrypt.hash(password, 12);
-        const newuser = await users.create({
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const newUser = await users.create({
             name,
             email,
-            password: hashedpassword
+            password: hashedPassword,
+            avatar
         });
-        const token = jwt.sign({
-            email: newuser.email, id: newuser._id
-        }, process.env.JWT_SECRET, { expiresIn: "1h" }
-        )
-        res.status(200).json({ result: newuser, token });
+        const token = jwt.sign({ email: newUser.email, id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        res.status(201).json({ result: newUser, token });
     } catch (error) {
-        res.status(500).json("something went wrong...")
-        return
+        console.error(error);
+        res.status(500).json({ message: "Something went wrong..." });
     }
-}
+};
 
 export const login = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const extinguser = await users.findOne({ email });
-        if (!extinguser) {
-            return res.status(404).json({ message: "User does not exists" })
+        const existingUser = await users.findOne({ email });
+        if (!existingUser) {
+            return res.status(404).json({ message: "User does not exist" });
         }
-        const ispasswordcrct = await bcrypt.compare(password, extinguser.password);
-        if (!ispasswordcrct) {
-            res.status(400).json({ message: "Invalid credentiasl" });
-            return
+        const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ message: "Invalid credentials" });
         }
         const token = jwt.sign({
-            email: extinguser.email, id: extinguser._id
-        }, process.env.JWT_SECRET, { expiresIn: "1h" }
-        )
+            email: existingUser.email, id: existingUser._id
+        }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-        res.status(200).json({ result: extinguser, token })
+        res.status(200).json({ result: { ...existingUser._doc, token } });
     } catch (error) {
-        res.status(500).json("something went wrong...")
-        return
+        console.error("Error during login:", error);
+        res.status(500).json({ message: "Something went wrong..." });
     }
 }

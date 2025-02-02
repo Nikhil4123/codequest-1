@@ -1,16 +1,16 @@
-import express from "express"
-import  {login,signup} from '../controller/auth.js'
-import { getallusers,updateprofile } from "../controller/users.js";
-import auth from "../middleware/auth.js"
+import express from "express";
+import { login, signup } from '../controller/auth.js';
+import { getallusers, updateprofile } from "../controller/users.js";
+import auth from "../middleware/auth.js";
+import upload from "../middleware/upload.js"; // Import upload middleware
 
-const router=express.Router();
+const router = express.Router();
 
-router.post("/signup",signup);
-router.post("/login",login);
+router.post("/signup", upload.single('avatar'), signup);
+router.post("/login", login);
 
-router.get("/getallusers",getallusers)
+router.get("/getallusers", getallusers);
 
-router.patch("/update/:id",auth,updateprofile)
+router.patch("/update/:id", auth, updateprofile);
 
-
-export default router
+export default router;

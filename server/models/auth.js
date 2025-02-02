@@ -5,7 +5,8 @@ import mongoose from "mongoose";
     password:{type:String,required:true},
     about:{type:String},
     tags:{type:[String]},
-    joinedon:{type:Date,default:Date.now}
+    joinedon:{type:Date,default:Date.now},
+    avatar: { type: String, default: null }
  })
 
  export default mongoose.model("User",userschema)

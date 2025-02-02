@@ -16,4 +16,4 @@ const Home = ({slidein}) => {
   )
 }
 
-export default Home
+export default Home;
